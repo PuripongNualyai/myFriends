@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/css/styles.css">
+    <title>myFriendsPage</title>
+</head>
+
+<body>
+    <div class="myDiv">
+        <h1 id="header1" style="display: block;">Click here to generate your friend list.</h1>
+        <h1 id="header2" style="display: none;">Please enter your friend information.</h1>
+        <button id="genBtn" onclick="generateForms()">Generate Forms</button><br><br>
+
+        <div id="formsContainer"></div>
+
+        <div id="output"></div>
+
+        <form>
+            <label for="operations">Choose a operation:</label>
+            <select name="operations" id="operations">
+                <option value="sum">sum age</option>
+                <option value="average">average age</option>
+                <option value="youngest">youngest age</option>
+                <option value="oldest">oldest age</option>
+            </select>
+            <br><br>
+        </form>
+
+        <button id="submitBtn" onclick="submitForms()">Submit Forms</button>
+
+        <div id="operationOutput"></div><br><br>
+
+        <button id="resetBtn" onclick="resetForms();generateForms()">Reset</button>
+    </div>
+    <script>
+        function generateForms() {
+            var formsContainer = document.getElementById("formsContainer");
+            var numForms = Math.floor(Math.random() * 9) + 1; // Generate a random number between 1 and 9
+            document.getElementById("header2").style.display = "block";
+            document.getElementById("header1").style.display = "none";
+
+            var formsHTML = '';
+            for (var i = 0; i < numForms; i++) {
+                formsHTML += '<br><form id="friendForm' + i + '">';
+                formsHTML += '<label for="nickname">Nickname : </label>';
+                formsHTML += '<input type="text" id="nickname' + i + '" name="nickname"><br><br>';
+                formsHTML += '<label for="age">Age (number only): </label>';
+                formsHTML += '<input type="number" id="age' + i + '" name="age"><br><br>';
+                formsHTML += '<hr>'
+                formsHTML += '</form>';
+            }
+
+            formsContainer.innerHTML = formsHTML;
+            document.getElementById("submitBtn").style.display = "inline";
+        }
+
+        function submitForms() {
+            var output = document.getElementById("output");
+            var numForms = document.getElementById("formsContainer").getElementsByTagName("form").length;
+            var operation = document.getElementById("operations");
+            var operationName = operation.options[operation.selectedIndex].text;
+            var oldestPerson = [];
+            var oldestAge = 0;
+            var youngestPerson = [];
+            var youngestAge = Infinity;
+
+            var sum = 0;
+
+            var inputs = document.querySelectorAll('[id^="nickname"], [id^="age"]');
+
+            // Check if any input is blank
+            for (var i = 0; i < inputs.length; i++) {
+                if (inputs[i].value === "") {
+                    alert("Please fill in all fields before submitting.");
+                    return;
+                }
+            }
+
+            output.innerHTML = ''; // Clear previous output
+            for (var i = 0; i < numForms; i++) {
+                var nickname = document.getElementById("nickname" + i).value;
+                var age = parseInt(document.getElementById("age" + i).value);
+
+                sum = sum + age;
+
+
+                // Check if age is a number
+                if (isNaN(age)) {
+                    alert("Please enter name in number!!");
+                    return;
+                }
+
+                if (operationName === "oldest age") {
+                    if (age > oldestAge) {
+                        oldestPerson = [{ nickname: nickname, age: age }];
+                        oldestAge = age;
+                    } else if (age === oldestAge) {
+                        oldestPerson.push({ nickname: nickname, age: age });
+                    }
+                }
+
+                if (operationName === "youngest age") {
+                    if (age < youngestAge) {
+                        youngestPerson = [{ nickname: nickname, age: age }];
+                        youngestAge = age;
+                    } else if (age === youngestAge) {
+                        youngestPerson.push({ nickname: nickname, age: age });
+                    }
+                }
+                // Display the submitted data
+                <!--output.innerHTML += "<p>nickname: " + nickname + "</p><p>age: " + age + "</p><br>";-->
+            }
+
+            oldestAge = 0;
+            youngestAge = 0;
+
+            var average = sum / numForms;
+            if (operationName == "sum age") {
+                document.getElementById("operationOutput").innerHTML = "<p>value of " + operationName + "</p><p> is " + sum + " </p>";
+            }
+            if (operationName == "average age") {
+                document.getElementById("operationOutput").innerHTML = "<p>value of " + operationName + "</p><p> is " + average + " </p>";
+            }
+
+            if (operationName == "oldest age") {
+                operationOutput = document.getElementById("operationOutput");
+                operationOutput.innerHTML += "<h3> the oldest friend:</h3>";
+                if (oldestPerson.length === 1) {
+                    operationOutput.innerHTML += "<p> nickname: " + oldestPerson[0].nickname + ", age: " + oldestPerson[0].age + "</p>";
+                } else {
+                    operationOutput.innerHTML += "<p>There is alot of oldest friend:</p>";
+                    oldestPerson.forEach(function (friend) {
+                        operationOutput.innerHTML += "<p>nickname: " + friend.nickname + ", age: " + friend.age + "</p>";
+                    });
+                }
+            }
+            if (operationName == "youngest age") {
+                operationOutput = document.getElementById("operationOutput");
+                operationOutput.innerHTML += "<h3> the youngest friend:</h3>";
+                if (youngestPerson.length === 1) {
+                    operationOutput.innerHTML += "<p> nickname: " + youngestPerson[0].nickname + ", age: " + youngestPerson[0].age + "</p>";
+                } else {
+                    operationOutput.innerHTML += "<p>There is alot of youngest friend:</p>";
+                    youngestPerson.forEach(function (friend) {
+                        operationOutput.innerHTML += "<p>nickname: " + friend.nickname + ", age: " + friend.age + "</p>";
+                    });
+                }
+            }
+
+            document.getElementById("resetBtn").style.display = "inline";
+            document.getElementById("operationOutput").style.display = "block";
+        }
+        function resetForms() {
+            var formsContainer = document.getElementById("formsContainer");
+            document.getElementById("operationOutput").style.display = "none";
+            formsContainer.innerHTML = ""; // ล้างข้อมูลฟอร์ม
+            document.getElementById("output").innerHTML = ""; // ล้างผลลัพธ์
+            document.getElementById("operationOutput").innerHTML = ""; // ล้างผลลัพธ์การดำเนินการ
+        }
+
+        var genBtn = document.getElementById("genBtn");
+        genBtn.addEventListener("mouseover", mouseoverGenBtn);
+        genBtn.addEventListener("click", clickGenBtn);
+        genBtn.addEventListener("mouseout", mouseoutGenBtn);
+
+        function mouseoverGenBtn(){
+            genBtn.style.backgroundColor = "darkgreen";
+        }
+
+        function clickGenBtn(){
+            genBtn.style.backgroundColor = "red";
+        }
+
+        function mouseoutGenBtn(){
+            genBtn.style.backgroundColor = "#04AA6D";
+        }
+
+    </script>
+</body>
+
+</html>
